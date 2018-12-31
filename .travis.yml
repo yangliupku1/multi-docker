@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t yangliupku/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run yangliupku/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t yangliupku/multi-client ./client
+  - docker build -t yangliupku/multi-nginx ./nginx
+  - docker build -t yangliupku/multi-server ./server
+  - docker build -t yangliupku/multi-workder ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push yangliupku/multi-client
+  - docker push yangliupku/multi-nginx
+  - docker push yangliupku/multi-server
+  - docker push yangliupku/multi-workder
